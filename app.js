@@ -108,6 +108,11 @@ class AcoustiCarProductionApp {
       recordBtn.innerHTML = '<i class="fas fa-microphone"></i> <span>เริ่มฟังเสียงจริง (Start Live Acoustic Scan)</span>';
     }
 
+    const masterBtn = document.getElementById('btnMasterScan');
+    const masterLabel = document.getElementById('masterScanLabel');
+    if (masterBtn) masterBtn.classList.remove('scanning');
+    if (masterLabel) masterLabel.innerText = 'แตะเพื่อฟัง';
+
     document.querySelectorAll('.sound-card').forEach(c => c.classList.remove('active'));
   }
 
@@ -135,6 +140,8 @@ class AcoustiCarProductionApp {
       const statusDot = document.getElementById('statusDot');
       const statusText = document.getElementById('statusText');
       const recordBtn = document.getElementById('btnRecord');
+      const masterBtn = document.getElementById('btnMasterScan');
+      const masterLabel = document.getElementById('masterScanLabel');
       const countdownOverlay = document.getElementById('scanCountdownOverlay');
       const countdownNumber = document.getElementById('countdownNumber');
       const countdownFill = document.getElementById('countdownFill');
@@ -147,6 +154,10 @@ class AcoustiCarProductionApp {
         recordBtn.classList.add('recording');
         recordBtn.innerHTML = '<i class="fas fa-stop-circle"></i> <span>กำลังสแกน... แตะเพื่อยกเลิก</span>';
       }
+      if (masterBtn) masterBtn.classList.add('scanning');
+      if (masterLabel) masterLabel.innerText = 'กำลังฟัง...';
+
+      if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
 
       this.startRenderLoop();
       showToast('ไมโครโฟนพร้อม: กรุณาจ่อไมค์เข้าใกล้เครื่องยนต์นิ่งๆ 5 วินาที...');
@@ -1155,6 +1166,113 @@ class AcoustiCarProductionApp {
         });
       });
     }
+
+    // Master Circular One-Touch Scan Button
+    const btnMasterScan = document.getElementById('btnMasterScan');
+    if (btnMasterScan) {
+      btnMasterScan.addEventListener('click', () => {
+        if ('vibrate' in navigator) navigator.vibrate([80, 40, 80]);
+        if (this.isRecording) {
+          this.stopAllAudio();
+          showToast('ยกเลิกการบันทึกเสียงแล้ว');
+        } else {
+          this.startLiveScan();
+        }
+      });
+    }
+
+    // Flashlight Torch for Engine Bay at Night
+    let torchStream = null;
+    let isTorchOn = false;
+    const btnTorch = document.getElementById('btnTorchToggle');
+    if (btnTorch) {
+      btnTorch.addEventListener('click', async () => {
+        try {
+          if (!isTorchOn) {
+            if (!torchStream) {
+              torchStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+              });
+            }
+            const track = torchStream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+            if (capabilities.torch) {
+              await track.applyConstraints({ advanced: [{ torch: true }] });
+              isTorchOn = true;
+              btnTorch.classList.add('active');
+              showToast('🔦 เปิดไฟฉายส่องห้องเครื่องแล้ว');
+            } else {
+              showToast('⚠️ กล้องอุปกรณ์นี้ไม่รองรับฟังก์ชันไฟฉาย');
+            }
+          } else {
+            if (torchStream) {
+              const track = torchStream.getVideoTracks()[0];
+              await track.applyConstraints({ advanced: [{ torch: false }] });
+              track.stop();
+              torchStream = null;
+            }
+            isTorchOn = false;
+            btnTorch.classList.remove('active');
+            showToast('ปิดไฟฉายแล้ว');
+          }
+        } catch (e) {
+          showToast('⚠️ ไม่สามารถเปิดไฟฉายได้ (จำเป็นต้องอนุญาตเข้าถึงกล้อง)');
+        }
+      });
+    }
+
+    // Mobile Bottom Dock Navigation
+    const dockScan = document.getElementById('dockBtnScan');
+    const dockReport = document.getElementById('dockBtnReport');
+    const dockGarages = document.getElementById('dockBtnGarages');
+    const dockCert = document.getElementById('dockBtnCert');
+    const dockHistory = document.getElementById('dockBtnHistory');
+
+    const setActiveDock = (id) => {
+      document.querySelectorAll('.dock-item').forEach(d => d.classList.remove('active'));
+      document.getElementById(id)?.classList.add('active');
+    };
+
+    if (dockScan) {
+      dockScan.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setActiveDock('dockBtnScan');
+      });
+    }
+    if (dockReport) {
+      dockReport.addEventListener('click', () => {
+        const reportEl = document.getElementById('reportSection') || document.getElementById('resultCard');
+        reportEl?.scrollIntoView({ behavior: 'smooth' });
+        setActiveDock('dockBtnReport');
+      });
+    }
+    if (dockGarages) {
+      dockGarages.addEventListener('click', () => {
+        document.getElementById('garagesSection')?.scrollIntoView({ behavior: 'smooth' });
+        setActiveDock('dockBtnGarages');
+      });
+    }
+    if (dockCert) {
+      dockCert.addEventListener('click', () => {
+        document.getElementById('certModal')?.classList.add('active');
+      });
+    }
+    if (dockHistory) {
+      dockHistory.addEventListener('click', () => {
+        this.renderHistoryModalList();
+        document.getElementById('historyModal')?.classList.add('active');
+      });
+    }
+
+    // FAQ Accordion Toggle
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.addEventListener('click', () => {
+        const item = q.closest('.faq-item');
+        const isActive = item.classList.contains('active');
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+        if (!isActive) item.classList.add('active');
+      });
+    });
 
     // Modals
     this.setupModals();
