@@ -41,7 +41,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { vehicle = {}, captureLocation = 'engine_bay', telemetry = {}, symptoms = [] } = req.body || {};
+    let body = req.body;
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        body = {};
+      }
+    }
+    const { vehicle = {}, captureLocation = 'engine_bay', telemetry = {}, symptoms = [] } = body || {};
 
     const peakHz = Number(telemetry.peakHz) || 0;
     const db = Number(telemetry.db) || 65;
