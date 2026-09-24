@@ -383,10 +383,10 @@ html, body {
   background: rgba(7, 10, 16, 0.7);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 0.6rem 0.85rem;
+  padding: 0.65rem 0.85rem;
   color: #fff;
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 16px; /* Prevents iOS Safari auto-zoom */
   transition: var(--transition);
 }
 
@@ -917,11 +917,17 @@ html, body {
   align-items: center;
 }
 
+.parts-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
 .parts-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.88rem;
-  margin-bottom: 1rem;
 }
 
 .parts-table th {
@@ -1370,7 +1376,7 @@ html, body {
   padding: 0.75rem 1rem;
   color: #fff;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 16px; /* Prevents iOS Safari auto-zoom */
 }
 
 .form-input:focus {
@@ -1422,47 +1428,251 @@ html, body {
   to { transform: translateX(0); opacity: 1; }
 }
 
-/* Responsive Breakpoints */
-@media (max-width: 1024px) {
-  .hero-banner {
-    grid-template-columns: 1fr;
-  }
-  .diagnostic-studio {
-    grid-template-columns: 1fr;
-  }
-  .pricing-grid {
-    grid-template-columns: 1fr;
+/* ==========================================================================
+   Comprehensive Responsive System & Mobile-First Device Cockpit
+   Tested for iPhone (SE, 12-16 Pro Max), Android (Galaxy, Pixel), Tablets, iPad
+   ========================================================================== */
+
+/* Universal touch targets & iOS zoom prevention */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+@media (max-width: 1200px) {
+  .app-container {
+    max-width: 100%;
+    padding: 1.25rem 1.25rem 4rem;
   }
 }
 
-@media (max-width: 680px) {
+@media (max-width: 1024px) {
+  .hero-banner {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .diagnostic-studio {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 768px) {
   .app-container {
-    padding: 1rem;
+    padding-left: max(0.85rem, env(safe-area-inset-left));
+    padding-right: max(0.85rem, env(safe-area-inset-right));
+    padding-top: max(0.85rem, env(safe-area-inset-top));
+    padding-bottom: 6rem; /* Space for mobile bottom dock */
   }
-  .top-nav {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-  .nav-actions {
-    width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
+  .hero-banner {
+    padding: 1.5rem 1.25rem;
   }
   .hero-content h2 {
-    font-size: 1.65rem;
+    font-size: 1.7rem;
+    line-height: 1.25;
+  }
+  .hero-desc {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  .hero-stats {
+    gap: 1.25rem;
+  }
+  .hero-image-wrap {
+    max-height: 240px;
+  }
+  .card-panel, .result-card, .garages-box {
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+  }
+}
+
+@media (max-width: 640px) {
+  .top-nav {
+    flex-direction: column;
+    gap: 0.85rem;
+    align-items: stretch;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-md);
+  }
+  .brand {
+    justify-content: flex-start;
+  }
+  .nav-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .btn-torch, .btn-nav-action {
+    width: 100%;
+    justify-content: center;
+    padding: 0.55rem 0.5rem;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+  .breakdown-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .breakdown-label {
+    min-width: unset;
+    font-size: 0.82rem;
+    color: var(--accent-cyan);
+  }
+  .breakdown-val {
+    font-size: 0.88rem;
+    line-height: 1.5;
   }
   .soundboard-grid {
     grid-template-columns: 1fr;
   }
   .telemetry-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
   }
   .capture-controls {
     grid-template-columns: 1fr;
   }
   .btn-record {
     grid-column: span 1;
+    padding: 0.95rem 1rem;
+    font-size: 0.98rem;
+  }
+  .modal-overlay {
+    padding: 0.6rem;
+  }
+  .modal-content-card {
+    padding: 1.35rem 1rem;
+    max-height: 94vh;
+    border-radius: var(--radius-md);
+  }
+  .cert-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .cert-header h3 {
+    font-size: 1.25rem;
+  }
+  .cert-header p {
+    font-size: 0.75rem;
+  }
+  .cert-stamp {
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+  }
+  .cert-footer-actions {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .result-card {
+    padding: 1.15rem 0.9rem;
+  }
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
+  }
+  .result-fault-title {
+    font-size: 1.22rem;
+    line-height: 1.3;
+  }
+  .confidence-gauge-box {
+    align-items: flex-start;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+  .confidence-val {
+    font-size: 1.45rem;
+  }
+  .garage-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem;
+  }
+  .garage-item .garage-meta {
+    flex-wrap: wrap;
+    gap: 0.45rem 0.85rem;
+  }
+  .garage-item > div:last-child {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+  }
+  .garage-item > div:last-child a,
+  .garage-item > div:last-child button {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem;
+  }
+  .history-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .parts-table th, .parts-table td {
+    padding: 0.45rem 0.35rem;
+    font-size: 0.78rem;
+  }
+  .affiliate-buy-btn {
+    font-size: 0.82rem;
+    padding: 0.75rem 0.65rem;
+    text-align: center;
+    line-height: 1.35;
+  }
+  .mechanic-script-box {
+    padding: 0.9rem;
+  }
+  .script-content {
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .app-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .brand-text h1 {
+    font-size: 1.1rem;
+  }
+  .brand-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+  .scanner-btn-wrapper {
+    width: 145px;
+    height: 145px;
+  }
+  .btn-master-scan {
+    width: 120px;
+    height: 120px;
+  }
+  .btn-master-scan i {
+    font-size: 1.8rem;
+  }
+  .metric-val {
+    font-size: 0.98rem;
+  }
+  .hero-content h2 {
+    font-size: 1.4rem;
   }
 }
 
