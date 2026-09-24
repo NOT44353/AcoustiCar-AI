@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AcoustiCar AI™ | ระบบตรวจจับและวินิจฉัยเสียงรถยนต์อัจฉริยะ (Production)</title>
+  <meta name="description" content="AcoustiCar AI แพลตฟอร์ม AI วินิจฉัยความผิดปกติของยานยนต์ด้วยคลื่นเสียง ตรวจจับสายพาน วาล์ว ชาร์ป ลูกปืนล้อ พร้อมประเมินราคาอะไหล่และอู่ใกล้คุณ">
+  <meta name="keywords" content="ตรวจเสียงรถ, เสียงเครื่องยนต์ผิดปกติ, AI วินิจฉัยรถยนต์, ซ่อมรถ, อะไหล่รถยนต์, AcoustiCar AI">
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/hero-scan.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Ambient Glowing Backdrop -->
+  <div class="ambient-glow">
+    <div class="glow-circle-1"></div>
+    <div class="glow-circle-2"></div>
+    <div class="glow-grid"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+      <a href="#" class="brand">
+        <div class="brand-icon">
+          <i class="fas fa-wave-square"></i>
+        </div>
+        <div class="brand-text">
+          <h1>AcoustiCar AI™</h1>
+          <span>Acoustic Vehicle Diagnostics (Production)</span>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <button class="btn-nav-action" id="btnNavHistory" type="button">
+          <i class="fas fa-history"></i> ประวัติการตรวจ (<span id="historyCount">0</span>)
+        </button>
+        <button class="btn-nav-action" id="btnNavPricing" type="button">
+          <i class="fas fa-tags"></i> แพ็กเกจราคา
+        </button>
+        <button class="btn-nav-action highlight" id="btnNavGarage" type="button">
+          <i class="fas fa-wrench"></i> สำหรับอู่ซ่อม / เต็นท์รถ
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Diagnostic HUD Banner -->
+    <section class="hero-banner">
+      <div class="hero-content">
+        <h2>วินิจฉัยความผิดปกติของรถยนต์<br><span>ด้วยพลังเสียง AI อัจฉริยะ</span></h2>
+        <p class="hero-desc">
+          ตรวจจับความเสียหายเชิงกลของเครื่องยนต์และช่วงล่างสดๆ ผ่านไมโครโฟน โดยประมวลผลคลื่นความถี่ Real-Time FFT และโมเดลจำแนกจุดเสียหาย พร้อมคำนวณราคาอะไหล่และสคริปต์คุยกับช่าง
+        </p>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-value cyan">96.2%</span>
+            <span class="stat-label">ความแม่นยำ AI</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value amber">14+</span>
+            <span class="stat-label">รูปแบบเสียงเสียหาย</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value green" id="statGaragesCount">ค้นหาอู่...</span>
+            <span class="stat-label">อู่บริการใกล้คุณ</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-image-wrap">
+        <img src="assets/hero-scan.jpg" alt="Acoustic Car Diagnostic Scanner HUD">
+        <div class="hero-tag"><i class="fas fa-satellite-dish"></i> REAL-TIME FFT SENSING</div>
+      </div>
+    </section>
+
+    <!-- Vehicle Profile & Real Data Input Form -->
+    <div class="vehicle-selector-bar">
+      <div class="vehicle-input-grid">
+        <div class="input-item">
+          <label><i class="fas fa-car"></i> ยี่ห้อและรุ่นรถ (Vehicle Make & Model):</label>
+          <input type="text" id="inputVehicleMake" class="veh-text-input" value="Toyota Yaris 1.2" placeholder="เช่น Honda City, Isuzu D-Max, Mazda 2">
+        </div>
+        <div class="input-item">
+          <label><i class="fas fa-id-card"></i> ทะเบียนรถ (License Plate):</label>
+          <input type="text" id="inputVehiclePlate" class="veh-text-input" value="กข-4920 กทม." placeholder="เช่น 1กข-9988">
+        </div>
+        <div class="input-item">
+          <label><i class="fas fa-road"></i> เลขไมล์ (Mileage km):</label>
+          <input type="number" id="inputVehicleMileage" class="veh-text-input" value="125000" placeholder="เช่น 120,000">
+        </div>
+        <div class="input-item">
+          <label><i class="fas fa-location-dot"></i> จุดที่กำลังจ่อฟังเสียง (Zone):</label>
+          <select id="selectCaptureZone" class="veh-text-input">
+            <option value="engine_bay">ห้องเครื่องยนต์ (Engine Bay)</option>
+            <option value="wheel_brakes">ล้อหน้า / ระบบเบรก (Wheels & Brakes)</option>
+            <option value="front_axle">เพลาขับ / ช่วงล่าง (Axles & Suspension)</option>
+            <option value="exhaust">ท่อไอเสีย / ใต้ท้องรถ (Exhaust & Chassis)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Diagnostic Studio Grid -->
+    <main class="diagnostic-studio">
+
+      <!-- LEFT PANEL: Capture & Telemetry Console -->
+      <section class="telemetry-console">
+        
+        <!-- Live Visualizer Screen Card -->
+        <div class="card-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-chart-line"></i>
+              <span>Live Acoustic Spectrogram</span>
+            </div>
+            <div class="viz-tabs">
+              <button class="viz-tab-btn active" data-mode="bars" type="button">Bars</button>
+              <button class="viz-tab-btn" data-mode="wave" type="button">Wave</button>
+              <button class="viz-tab-btn" data-mode="spectrogram" type="button">Heatmap</button>
+              <button class="viz-tab-btn" data-mode="radar" type="button">Polar</button>
+            </div>
+          </div>
+
+          <!-- Canvas Screen -->
+          <div class="visualizer-screen">
+            <canvas id="visualizerCanvas"></canvas>
+            <div class="screen-overlay">
+              <span id="screenSampleRate">44,100 Hz / 2048 FFT</span>
+              <div class="status-indicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">สแตนด์บาย — พร้อมรับเสียง</span>
+              </div>
+            </div>
+
+            <!-- Scan Countdown Overlay -->
+            <div class="scan-countdown-overlay" id="scanCountdownOverlay" style="display:none;">
+              <div class="countdown-circle">
+                <span id="countdownNumber">5.0</span>s
+              </div>
+              <p>กำลังวิเคราะห์คลื่นเสียงเครื่องยนต์... กรุณาจ่อไมค์นิ่งๆ</p>
+              <div class="countdown-progress-bar">
+                <div class="countdown-fill" id="countdownFill"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audio Input Action Controls -->
+          <div class="capture-controls">
+            <button class="btn-record" id="btnRecord" type="button">
+              <i class="fas fa-microphone"></i>
+              <span id="btnRecordLabel">เริ่มฟังเสียงจริง (Start Live Acoustic Scan)</span>
+            </button>
+            
+            <button class="btn-file-upload" id="btnUploadTrigger" type="button">
+              <i class="fas fa-file-audio"></i>
+              <span>อัปโหลดคลิปเสียง (.mp3, .wav)</span>
+            </button>
+            <input type="file" id="audioFileInput" accept="audio/*" style="display:none;">
+
+            <button class="btn-stop-audio" id="btnStopAudio" type="button">
+              <i class="fas fa-stop"></i>
+              <span>หยุดเสียง</span>
+            </button>
+          </div>
+
+          <!-- Real-Time Telemetry Gauges -->
+          <div class="telemetry-grid">
+            <div class="metric-box">
+              <div class="metric-title">
+                <span>Peak Frequency</span>
+                <i class="fas fa-wave-square"></i>
+              </div>
+              <div class="metric-val" id="metricPeakHz">-- <span class="metric-unit">Hz</span></div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-title">
+                <span>Sound Level</span>
+                <i class="fas fa-volume-high"></i>
+              </div>
+              <div class="metric-val" id="metricDb">-- <span class="metric-unit">dB</span></div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-title">
+                <span>Est. Cadence</span>
+                <i class="fas fa-gauge-high"></i>
+              </div>
+              <div class="metric-val" id="metricRpm">-- <span class="metric-unit">RPM</span></div>
+            </div>
+
+            <div class="metric-box">
+              <div class="metric-title">
+                <span>Crest Factor</span>
+                <i class="fas fa-bolt"></i>
+              </div>
+              <div class="metric-val" id="metricCrest">-- <span class="metric-unit">x</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sound Simulation Benchmark Lab Card -->
+        <div class="card-panel simulator-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fas fa-flask-vial"></i>
+              <span>Acoustic Benchmark Lab (ชุดทดสอบสอบเทียบเสียง)</span>
+            </div>
+          </div>
+          <p class="sim-notice">
+            <i class="fas fa-info-circle"></i> สำหรับการสอบเทียบระบบหรือทดสอบโดยไม่มีรถจริง: <strong>กดคลิกที่การ์ดจำลองเสียงด้านล่าง</strong> เพื่อสร้างคลื่นเสียงกายภาพผ่าน Web Audio API แล้วส่งเข้าสู่ระบบวินิจฉัยจริง:
+          </p>
+
+          <div class="soundboard-grid">
+            <!-- 1. Belt Squeal -->
+            <div class="sound-card" data-sound="belt_squeal">
+              <div class="sound-card-header">
+                <span class="sound-title">1. สายพานหน้าเครื่องหย่อน</span>
+                <span class="sound-badge warning">Warning</span>
+              </div>
+              <p class="sound-desc">หวีดแหลม 3.8 kHz ตอนสตาร์ทหรือเปิดแอร์</p>
+              <div class="sound-play-bar"><i class="fas fa-play"></i> คลิกทดสอบเสียง</div>
+            </div>
+
+            <!-- 2. Valve Lifter Tick -->
+            <div class="sound-card" data-sound="valve_lifter">
+              <div class="sound-card-header">
+                <span class="sound-title">2. วาล์วเคาะ / ลิฟเตอร์ตัน</span>
+                <span class="sound-badge warning">Warning</span>
+              </div>
+              <p class="sound-desc">เคาะแต๊กๆๆ ถี่ๆ 14 Hz ตามรอบเครื่อง</p>
+              <div class="sound-play-bar"><i class="fas fa-play"></i> คลิกทดสอบเสียง</div>
+            </div>
+
+            <!-- 3. Rod Knock -->
+            <div class="sound-card" data-sound="rod_knock">
+              <div class="sound-card-header">
+                <span class="sound-title">3. ชาร์ปละลาย (Rod Knock)</span>
+                <span class="sound-badge danger">Critical</span>
+              </div>
+              <p class="sound-desc">โขกหนักปังๆๆ ลึกจากท่อนล่างเมื่อเร่งคันเร่ง</p>
+              <div class="sound-play-bar"><i class="fas fa-play"></i> คลิกทดสอบเสียง</div>
+            </div>
+
+            <!-- 4. Brake Wear -->
+            <div class="sound-card" data-sound="brake_wear">
+              <div class="sound-card-header">
+                <span class="sound-title">4. ผ้าเบรกหมด / ขูดจาน</span>
+                <span class="sound-badge danger">Danger</span>
+              </div>
+              <p class="sound-desc">เสียดสีครืดๆ แหลมจี๊ด 3.2 kHz ตอนเหยียบเบรก</p>
+              <div class="sound-play-bar"><i class="fas fa-play"></i> คลิกทดสอบเสียง</div>
+            </div>
+
+            <!-- 5. Wheel Bearing -->
+            <div class="sound-card" data-sound="wheel_bearing">
+              <div class="sound-card-header">
+                <span class="sound-title">5. ลูกปืนดุมล้อแตก</span>
+                <span class="sound-badge warning">Warning</span>
+              </div>
+              <p class="sound-desc">หอนอื้อๆ วู้ๆ 240 Hz ยิ่งวิ่งเร็วยิ่งดัง</p>
+              <div class="sound-play-bar"><i class="fas fa-play"></i> คลิกทดสอบเสียง</div>
+            </div>
+
+            <!-- 6. CV Joint -->
+            <div class="sound-card" data-sound="cv_joint">
+              <div class="sound-card-header">
+                <span class="sound-title">6. หัวเพลาขับนอกแตก</span>
+                <span class="sound-badge warning">Alert</span>
+              </div>
+              <p class="sound-desc">เคาะกึกๆๆ รัวเวลาหักเลี้ยวสุดแล้วออกตัว</p>
+              <div class="sound-play-bar"><i class="fas fa-play"></i> คลิกทดสอบเสียง</div>
+            </div>
+
+            <!-- 7. Vacuum Leak -->
+            <div class="sound-card" data-sound="vacuum_leak">
+              <div class="sound-card-header">
+                <span class="sound-title">7. ท่อไอดี / แวคคั่มรั่ว</span>
+                <span class="sound-badge moderate">Moderate</span>
+              </div>
+              <p class="sound-desc">เสียงลมดูดฟู่ๆ 4.8 kHz รอบเดินเบากระพือ</p>
+              <div class="sound-play-bar"><i class="fas fa-play"></i> คลิกทดสอบเสียง</div>
+            </div>
+
+            <!-- 8. Healthy Engine -->
+            <div class="sound-card" data-sound="normal_engine">
+              <div class="sound-card-header">
+                <span class="sound-title">8. เครื่องยนต์ปกติสมบูรณ์</span>
+                <span class="sound-badge safe">Healthy</span>
+              </div>
+              <p class="sound-desc">คลื่นฮาร์โมนิกนุ่มนวล รอบเดินเบา 800 RPM ไร้เสียงแหลม</p>
+              <div class="sound-play-bar"><i class="fas fa-play"></i> คลิกทดสอบเสียง</div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT PANEL: AI Diagnostic Report & Commercial Monetization -->
+      <section class="diagnostic-report-panel">
+
+        <!-- Standby Placeholder when no scan has been done -->
+        <div class="result-standby-card" id="resultStandbyCard">
+          <div class="standby-icon"><i class="fas fa-stethoscope"></i></div>
+          <h3>ระบบพร้อมสำหรับการตรวจวินิจฉัย</h3>
+          <p>
+            กรุณาจ่อไมโครโฟนมือถือหรือคอมพิวเตอร์เข้าใกล้จุดที่เกิดเสียง แล้วกดปุ่ม <strong>"เริ่มฟังเสียงจริง"</strong> หรือเลือกเสียงจากแล็บเพื่อดูผลวิเคราะห์ทางกล
+          </p>
+        </div>
+
+        <!-- Result Diagnostic Card (Populated dynamically by API/Engine) -->
+        <div class="result-card status-warning" id="resultCard" style="display:none;">
+          
+          <div class="result-header">
+            <div>
+              <div class="veh-pill-badge" id="resVehBadge">Toyota Yaris (กข-4920)</div>
+              <h3 class="result-fault-title" id="resFaultTitle">สายพานหน้าเครื่องหย่อน / ลูกรอกเสื่อม</h3>
+              <p class="result-fault-eng" id="resFaultEng">Serpentine Belt Slippage / Tensioner Failure</p>
+            </div>
+            <div class="confidence-gauge-box">
+              <span class="confidence-val" id="resConfidence">94%</span>
+              <span class="confidence-label">AI Match Score</span>
+            </div>
+          </div>
+
+          <!-- Severity Alert Banner -->
+          <div class="severity-banner warning" id="resSeverityBanner">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="resSeverityText">🟠 คำเตือน (Warning) - ควรรีบตรวจเช็กภายในสัปดาห์นี้</span>
+          </div>
+
+          <!-- Technical Breakdown -->
+          <div class="analysis-breakdown">
+            <div class="breakdown-row">
+              <span class="breakdown-label"><i class="fas fa-wave-square"></i> ความถี่ที่ตรวจพบ:</span>
+              <span class="breakdown-val" id="resPattern">3,850 Hz (ตรวจพบพีคความถี่สูงต่อเนื่อง)</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label"><i class="fas fa-gears"></i> สาเหตุเชิงกล (Root Cause):</span>
+              <span class="breakdown-val" id="resRootCause">สายพานขาดความตึงตามสเปก ยางแห้งแตกลายงา หรือลูกปืนลูกรอกตั้งสายพานเริ่มฝืด ลื่นไถลเสียดสีกับมู่เล่ย์</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label"><i class="fas fa-skull-crossbones"></i> ความเสี่ยงหากปล่อยไว้:</span>
+              <span class="breakdown-val" id="resRisk">สายพานอาจขาดกลางทาง ไดชาร์จหยุดทำงาน ปั๊มน้ำหล่อเย็นหยุดหมุนจนเครื่องยนต์ Overheat ฝาสูบโก่ง</span>
+            </div>
+          </div>
+
+          <!-- Parts & Labor Estimator (Thai Market Standard) -->
+          <div class="parts-box">
+            <div class="parts-box-title">
+              <span><i class="fas fa-coins" style="color:var(--accent-amber);"></i> ประมาณการค่าอะไหล่และค่าแรง (ราคากลางในไทย)</span>
+            </div>
+            <table class="parts-table">
+              <thead>
+                <tr>
+                  <th>รายการชิ้นส่วน / บริการ</th>
+                  <th>แท้ศูนย์ (OEM)</th>
+                  <th>เทียบพรีเมียม</th>
+                </tr>
+              </thead>
+              <tbody id="partsTableBody">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-top:0.5rem; border-top:1px dashed rgba(255,255,255,0.1);">
+              <span style="font-size:0.88rem; color:var(--text-dim);">งบประมาณรวมที่ควรเตรียม:</span>
+              <span style="font-family:var(--font-display); font-size:1.15rem; font-weight:700; color:var(--accent-cyan);" id="resTotalEst">฿1,600 - ฿4,850 บาท</span>
+            </div>
+
+            <!-- Shopee / Lazada Affiliate Monetization Link -->
+            <a href="https://shopee.co.th" target="_blank" rel="noopener noreferrer" class="affiliate-buy-btn" id="affiliateBuyBtn">
+              <i class="fas fa-shopping-bag"></i>
+              <span>สั่งซื้ออะไหล่แท้ตรงรุ่นบน Shopee / Lazada (รับส่วนลด 10%)</span>
+            </a>
+          </div>
+
+          <!-- Anti-Fraud Mechanic Script Box -->
+          <div class="mechanic-script-box">
+            <div class="script-header">
+              <span class="script-title"><i class="fas fa-comment-dots"></i> สคริปต์ยื่นให้ช่างดู (ป้องกันการโดนฟันราคา)</span>
+              <button class="btn-copy-script" id="btnCopyScript" type="button">
+                <i class="fas fa-copy"></i> คัดลอกข้อความ
+              </button>
+            </div>
+            <p class="script-content" id="mechanicScriptText">
+              แจ้งช่าง: "นำรถมาตรวจเช็กสายพานหน้าเครื่องและลูกรอกตั้งสายพาน มีเสียงหวีดความถี่ประมาณ 3.8 kHz ตอนสตาร์ท รบกวนช่วยเช็กความตึงและสภาพรอยแตกลายงาของสายพาน และหมุนเช็กลูกปืนลูกรอก ไม่ต้องถอดไดชาร์จครับ"
+            </p>
+          </div>
+
+          <!-- Export Health Certificate CTA -->
+          <div class="action-bar">
+            <button class="btn-export-cert" id="btnExportCert" type="button">
+              <i class="fas fa-file-pdf"></i>
+              <span>พิมพ์ใบรับรองสุขภาพเสียงรถ (Acoustic Health Certificate)</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Verified Partner Garages Nearby (Lead Generation Monetization) -->
+        <div class="garages-box">
+          <div class="panel-header" style="margin-bottom:0.5rem;">
+            <div class="panel-title">
+              <i class="fas fa-map-location-dot"></i>
+              <span>ศูนย์บริการและอู่ซ่อมรถพันธมิตร (ค้นหาตามพิกัดจริง)</span>
+            </div>
+            <button class="btn-refresh-loc" id="btnRefreshLocation" type="button">
+              <i class="fas fa-crosshairs"></i> พิกัดปัจจุบัน
+            </button>
+          </div>
+          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.75rem;" id="garageStatusDesc">
+            กำลังดึงข้อมูลศูนย์บริการและอู่ใกล้เคียง...
+          </p>
+
+          <div class="garage-list" id="garageListContainer">
+            <!-- Dynamically populated from /api/garages -->
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================
+       MODAL 1: Vehicle Acoustic Health Certificate (Printable)
+       ======================================================== -->
+  <div class="modal-overlay" id="certModal">
+    <div class="modal-content-card cert-card">
+      <button class="modal-close-btn" id="closeCert" type="button">&times;</button>
+      <div class="cert-header">
+        <h3>VEHICLE ACOUSTIC HEALTH CERTIFICATE</h3>
+        <p>ใบรับรองผลการตรวจวิเคราะห์คลื่นเสียงเครื่องยนต์และยานยนต์</p>
+      </div>
+
+      <div class="cert-grid">
+        <div class="cert-field">
+          <label>Certificate Serial / Hash</label>
+          <span id="certSerial">AC-849120</span>
+        </div>
+        <div class="cert-field">
+          <label>Inspection Timestamp</label>
+          <span id="certDate">24 กันยายน 2569 15:30</span>
+        </div>
+        <div class="cert-field">
+          <label>Vehicle Make & Model</label>
+          <span id="certVehicle">Toyota Yaris 1.2 (กข-4920 กทม.)</span>
+        </div>
+        <div class="cert-field">
+          <label>Mileage (กม.)</label>
+          <span id="certMileage">125,000 กม.</span>
+        </div>
+        <div class="cert-field" style="grid-column: span 2;">
+          <label>Primary Acoustic Finding</label>
+          <span id="certHealth" style="color:var(--accent-amber);">สายพานหน้าเครื่องหย่อน / ลูกรอกเสื่อม (94%)</span>
+        </div>
+      </div>
+
+      <!-- Embedded Spectrum Snapshot in Certificate -->
+      <div class="cert-spectrogram-embed">
+        <label style="font-size:0.72rem; color:var(--text-dim); text-transform:uppercase; margin-bottom:4px; display:block;">Recorded FFT Acoustic Signature</label>
+        <img id="certSpectrogramImg" alt="Acoustic Spectrum" style="width:100%; height:90px; border-radius:6px; background:#000; display:block;">
+      </div>
+
+      <div style="text-align: center;">
+        <div class="cert-stamp" id="certStamp">PASSED / ตรวจผ่านเกณฑ์</div>
+      </div>
+
+      <div class="cert-footer-actions">
+        <button class="btn-print" id="btnPrintCert" type="button">
+          <i class="fas fa-print"></i> สั่งพิมพ์เอกสาร / บันทึกเป็น PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 2: Scan History Modal (Persistent localStorage)
+       ======================================================== -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal-content-card" style="max-width: 680px;">
+      <button class="modal-close-btn" id="closeHistory" type="button">&times;</button>
+      <div style="margin-bottom:1.5rem;">
+        <h3 style="font-family:var(--font-display); font-size:1.45rem; color:#fff;">ประวัติการตรวจสุขภาพเสียงรถยนต์</h3>
+        <p style="color:var(--text-muted); font-size:0.85rem;">รายการสแกนทั้งหมดที่ถูกบันทึกไว้ในเครื่องของคุณ</p>
+      </div>
+
+      <div class="history-list" id="historyListContainer">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 3: SaaS Pricing / Monetization Modal
+       ======================================================== -->
+  <div class="modal-overlay" id="pricingModal">
+    <div class="modal-content-card" style="max-width: 840px;">
+      <button class="modal-close-btn" id="closePricing" type="button">&times;</button>
+      <div style="text-align:center; margin-bottom:1.5rem;">
+        <h3 style="font-family:var(--font-display); font-size:1.6rem; color:#fff;">เลือกแพ็กเกจที่เหมาะกับคุณ</h3>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.35rem;">ปลดล็อกการตรวจเช็กไม่จำกัด และเครื่องมือระดับช่างมืออาชีพ</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Plan 1 -->
+        <div class="pricing-card">
+          <span class="pricing-plan-name">Free Starter</span>
+          <div class="pricing-price">฿0 <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">/ ตลอดชีพ</span></div>
+          <ul class="pricing-features">
+            <li><i class="fas fa-check"></i> ตรวจเสียงรถฟรี 3 ครั้ง/เดือน</li>
+            <li><i class="fas fa-check"></i> ผลวิเคราะห์ระดับความรุนแรง</li>
+            <li><i class="fas fa-check"></i> ค้นหาอู่พันธมิตรใกล้เคียง</li>
+          </ul>
+          <button class="btn-pricing-select" type="button">ใช้งานปัจจุบัน</button>
+        </div>
+
+        <!-- Plan 2 -->
+        <div class="pricing-card popular">
+          <span class="pricing-card-badge">ยอดนิยม</span>
+          <span class="pricing-plan-name">Pro Car Owner</span>
+          <div class="pricing-price">฿99 <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">/ เดือน</span></div>
+          <ul class="pricing-features">
+            <li><i class="fas fa-check"></i> ตรวจไม่จำกัดจำนวนครั้ง</li>
+            <li><i class="fas fa-check"></i> รายงานสคริปต์คุยกับช่าง</li>
+            <li><i class="fas fa-check"></i> ออกใบรับรอง Certificate ได้</li>
+            <li><i class="fas fa-check"></i> รับส่วนลดค่าแรงอู่ 10-15%</li>
+          </ul>
+          <button class="btn-pricing-select" style="background:var(--accent-cyan); color:#000;" type="button">สมัครสมาชิก Pro</button>
+        </div>
+
+        <!-- Plan 3 -->
+        <div class="pricing-card">
+          <span class="pricing-plan-name">B2B Workshop & Dealer</span>
+          <div class="pricing-price">฿1,490 <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">/ เดือน</span></div>
+          <ul class="pricing-features">
+            <li><i class="fas fa-check"></i> สำหรับเต็นท์รถมือสอง & อู่ซ่อม</li>
+            <li><i class="fas fa-check"></i> ออกใบรับรองพร้อมตราเต็นท์ไม่จำกัด</li>
+            <li><i class="fas fa-check"></i> ระบบรับ Lead ลูกค้าส่งเข้าอู่</li>
+            <li><i class="fas fa-check"></i> API เชื่อมต่อระบบสต็อกรถ</li>
+          </ul>
+          <button class="btn-pricing-select" type="button">ติดต่อฝ่ายขาย B2B</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 4: B2B Garage Partner Registration Form
+       ======================================================== -->
+  <div class="modal-overlay" id="garageModal">
+    <div class="modal-content-card" style="max-width: 540px;">
+      <button class="modal-close-btn" id="closeGarage" type="button">&times;</button>
+      <div style="text-align:center; margin-bottom:1.5rem;">
+        <h3 style="font-family:var(--font-display); font-size:1.5rem; color:#fff;">สมัครเข้าร่วมเครือข่ายอู่พันธมิตร</h3>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.35rem;">รับลูกค้ารถยนต์ในละแวกของคุณที่ตรวจพบปัญหาเสียงโดยตรง</p>
+      </div>
+
+      <form id="garageSignupForm">
+        <div class="form-group">
+          <label>ชื่ออู่ซ่อมรถ / ศูนย์บริการ</label>
+          <input type="text" class="form-input" placeholder="เช่น อู่สมชายการช่าง หรือ บอยเซอร์วิส" required>
+        </div>
+        <div class="form-group">
+          <label>ความเชี่ยวชาญเฉพาะทาง</label>
+          <input type="text" class="form-input" placeholder="เช่น ช่วงล่าง-เบรก, เครื่องยนต์เบนซิน-ดีเซล, เกียร์ออโต้" required>
+        </div>
+        <div class="form-group">
+          <label>จังหวัด / เขตหรืออำเภอที่ตั้ง</label>
+          <input type="text" class="form-input" placeholder="เช่น กรุงเทพฯ เขตบางนา หรือ เชียงใหม่" required>
+        </div>
+        <div class="form-group">
+          <label>เบอร์โทรศัพท์ / LINE ID ติดต่อ</label>
+          <input type="text" class="form-input" placeholder="08X-XXX-XXXX หรือ LineID" required>
+        </div>
+        <button type="submit" class="btn-submit-form">ส่งข้อมูลสมัครเข้าร่วมเครือข่าย</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

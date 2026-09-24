@@ -1,0 +1,16 @@
+{
+  "name": "AcoustiCar AI - Acoustic Vehicle Diagnostics & Health AI",
+  "short_name": "AcoustiCar AI",
+  "description": "ระบบ AI ตรวจจับและวินิจฉัยเสียงความผิดปกติของยานยนต์อัจฉริยะ สำหรับผู้ใช้ทั่วไป อู่ซ่อมรถ และเต็นท์รถมือสอง",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07090e",
+  "theme_color": "#00f2fe",
+  "icons": [
+    {
+      "src": "assets/hero-scan.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
