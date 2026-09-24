@@ -2,6 +2,12 @@
 > **Next-Generation Acoustic Vehicle Diagnostics & Predictive Maintenance AI**  
 > *แพลตฟอร์ม AI วินิจฉัยความผิดปกติของยานยนต์ด้วยคลื่นเสียง สำหรับผู้ใช้ทั่วไป อู่ซ่อมรถ และเต็นท์รถมือสอง*
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel)](https://acousticar-ai.vercel.app)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/NOT44353/AcoustiCar-AI)
+
+🌐 **Live Production Website:** [https://acousticar-ai.vercel.app](https://acousticar-ai.vercel.app)  
+📦 **GitHub Repository:** [https://github.com/NOT44353/AcoustiCar-AI](https://github.com/NOT44353/AcoustiCar-AI)
+
 ---
 
 ## 🌟 จุดเด่นของโปรเจกต์ (Product Highlights)
